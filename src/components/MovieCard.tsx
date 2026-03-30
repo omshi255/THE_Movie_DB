@@ -1,0 +1,47 @@
+import { useNavigate } from "react-router-dom";
+
+type Props = {
+  movie: any;
+  imgBaseUrl: string;
+};
+
+const MovieCard = ({ movie, imgBaseUrl }: Props) => {
+  const navigate = useNavigate();
+
+  const title = movie.title || movie.name;
+  const date = movie.release_date || movie.first_air_date;
+
+  return (
+    <div
+      onClick={() => {
+        console.log("clicked", movie.id);
+        navigate(`/movie/${movie.id}`);
+      }}
+      className="bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition duration-300 cursor-pointer"
+    >
+      <img
+      loading="lazy"
+        src={
+          movie.poster_path
+            ? `${imgBaseUrl}${movie.poster_path}`
+            : "https://via.placeholder.com/500x750"
+        }
+        alt={title}
+        className="w-full h-72 object-cover"
+      />
+
+      <div className="p-3">
+        <h2 className="text-white font-semibold text-sm truncate">
+          {title}
+        </h2>
+
+        <div className="flex justify-between text-gray-400 text-xs mt-1">
+          <span>⭐ {movie.vote_average}</span>
+          <span>{date?.slice(0, 4)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MovieCard;

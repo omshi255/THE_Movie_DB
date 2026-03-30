@@ -1,64 +1,41 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchTV, IMG_BASE_URL } from "../api/tmdb";
+import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
+import { getTV, incrementTVPage } from "../features/tv/tvSlice";
+import { IMG_BASE_URL } from "../api/tmdb";
 
 const TV = () => {
-  const [tv, setTv] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { shows, page, loading } = useAppSelector((state) => state.tv);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      const data = await fetchTV(page);
-
-      setTv((prev) => {
-        const newData = data.results || [];
-
-        const unique = newData.filter(
-          (item: any) => !prev.some((p: any) => p.id === item.id)
-        );
-
-        return [...prev, ...unique];
-      });
-    };
-
-    load();
+    dispatch(getTV(page));
   }, [page]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setPage((prev) => prev + 1);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !loading) {
+        dispatch(incrementTVPage());
       }
     });
-
     if (observerRef.current) observer.observe(observerRef.current);
-
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   return (
     <div className="bg-black min-h-screen p-5">
       <h2 className="text-white mb-4">TV Shows</h2>
-
       <div className="grid grid-cols-[repeat(auto-fill,150px)] gap-3">
-        {tv.map((t, index) => (
-          <div
-            key={`${t.id}-${index}`} 
-            onClick={() => navigate(`/tv/${t.id}`)}
-            className="cursor-pointer"
-          >
-            <img
-              loading="lazy"
-              src={`${IMG_BASE_URL}${t.poster_path}`}
-              className="w-full"
-            />
+        {shows.map((t) => (
+          <div key={t.id} onClick={() => navigate(`/tv/${t.id}`)} className="cursor-pointer">
+            <img loading="lazy" src={`${IMG_BASE_URL}${t.poster_path}`} className="w-full" />
             <p className="text-white text-xs">{t.name}</p>
           </div>
         ))}
       </div>
-
+      {loading && <p className="text-white text-center py-4">Loading...</p>}
       <div ref={observerRef} className="h-[40px]" />
     </div>
   );

@@ -1,35 +1,25 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchPopularMovies } from "../../api/tmdb";
+import { fetchMovies } from "../../api/tmdb";
 
 interface MovieState {
   movies: any[];
+  page: number;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: MovieState = {
   movies: [],
+  page: 1,
   loading: false,
   error: null,
 };
 
 export const getMovies = createAsyncThunk(
   "movies/getMovies",
-  async () => {
-    const pages = [1, 2, 3, 4];
-
-    const responses = await Promise.all(
-      pages.map((page) => fetchPopularMovies(page))
-    );
-
-    const allMovies = responses
-      .flatMap((res) => res.results)
-      .filter(
-        (movie, index, self) =>
-          index === self.findIndex((m) => m.id === movie.id)
-      );
-
-    return allMovies;
+  async (page: number) => {
+    const data = await fetchMovies(page);
+    return data.results || [];
   }
 );
 
@@ -37,8 +27,12 @@ const movieSlice = createSlice({
   name: "movies",
   initialState,
   reducers: {
+    incrementMoviePage: (state) => {
+      state.page += 1;
+    },
     resetMovies: (state) => {
       state.movies = [];
+      state.page = 1;
       state.error = null;
     },
   },
@@ -50,7 +44,10 @@ const movieSlice = createSlice({
       })
       .addCase(getMovies.fulfilled, (state, action) => {
         state.loading = false;
-        state.movies = action.payload;
+        const unique = action.payload.filter(
+          (item: any) => !state.movies.some((m) => m.id === item.id)
+        );
+        state.movies = [...state.movies, ...unique];
       })
       .addCase(getMovies.rejected, (state) => {
         state.loading = false;
@@ -59,6 +56,5 @@ const movieSlice = createSlice({
   },
 });
 
-
-export const { resetMovies } = movieSlice.actions;
+export const { incrementMoviePage, resetMovies } = movieSlice.actions;
 export default movieSlice.reducer;

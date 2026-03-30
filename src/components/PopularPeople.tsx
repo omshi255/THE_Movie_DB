@@ -42,7 +42,7 @@ useEffect(() => {
               src={
                 person.profile_path
                   ? `${IMG_BASE_URL}${person.profile_path}`
-                  : "https://via.placeholder.com/150"
+                  : "https://via.placeholder"
               }
               className="w-full h-[200px] object-cover"
             />

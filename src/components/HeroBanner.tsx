@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { fetchTrendingAll, IMG_BASE_URL } from "../api/tmdb";
 
+interface Movie {
+  id: number;
+  title?: string;
+  name?: string;
+  backdrop_path?: string;
+}
+
 const HeroBanner = () => {
-  const [movie, setMovie] = useState<unknown>(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
     const getBanner = async () => {
@@ -21,22 +28,24 @@ const HeroBanner = () => {
 
   if (!movie) return null;
 
-  const title = movie.title || movie.name;
+  const title = movie.title || movie.name || "No Title";
   const bg = movie.backdrop_path;
 
   return (
     <div
       className="h-screen bg-cover bg-center flex items-center"
       style={{
-        backgroundImage: `url(${IMG_BASE_URL}${bg})`,
+        backgroundImage: bg
+          ? `url(${IMG_BASE_URL}${bg})`
+          : "none",
       }}
     >
       <div className="bg-black/60 w-full h-full flex flex-col justify-center px-10">
-      <h2 className="text-white text-2xl font-bol">Welcome </h2>
+        <h2 className="text-white text-2xl font-bold">Welcome</h2>
+
         <h1 className="text-white text-4xl font-bold">
           {title}
         </h1>
-        
       </div>
     </div>
   );

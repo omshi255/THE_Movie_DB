@@ -5,6 +5,8 @@ const Home = lazy(() => import("./pages/Home"));
 const MovieDetails = lazy(() => import("./pages/MovieDetails"));
 const Movies = lazy(() => import("./pages/Movies"));
 const TV = lazy(() => import("./pages/TV"));
+const TVDetails = lazy(() => import("./pages/TVDetails"));
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer"
 function App() {
@@ -18,6 +20,7 @@ function App() {
           <Route path="/people" element={<People />} />
           <Route path="/movies" element={<Movies />} />
           <Route path="/tv" element={<TV />} />
+          <Route path="/tv/:id" element={<TVDetails />} />
         </Routes>
        
       </Suspense>

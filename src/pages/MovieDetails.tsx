@@ -59,7 +59,7 @@ const MovieDetails = () => {
             src={
               movie.poster_path
                 ? `${IMG_BASE_URL}${movie.poster_path}`
-                : "https://via.placeholder.com/300x450"
+                : "https://via.placeholder"
             }
             className="w-60 rounded shadow-lg"
           />
@@ -93,7 +93,7 @@ const MovieDetails = () => {
                 src={
                   actor.profile_path
                     ? `${IMG_BASE_URL}${actor.profile_path}`
-                    : "https://via.placeholder.com/150"
+                    : "https://via.placeholder"
                 }
                 className="w-full h-40 object-cover rounded"
               />
@@ -121,7 +121,7 @@ const MovieDetails = () => {
                 src={
                   item.poster_path
                     ? `${IMG_BASE_URL}${item.poster_path}`
-                    : "https://via.placeholder.com/200x300"
+                    : "https://via.placeholder"
                 }
                 className="w-full h-56 object-cover rounded"
               />

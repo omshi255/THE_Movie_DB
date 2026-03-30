@@ -24,7 +24,7 @@ const MovieCard = ({ movie, imgBaseUrl }: Props) => {
         src={
           movie.poster_path
             ? `${imgBaseUrl}${movie.poster_path}`
-            : "https://via.placeholder.com/500x750"
+            : "https://via.placeholder"
         }
         alt={title}
         className="w-full h-72 object-cover"

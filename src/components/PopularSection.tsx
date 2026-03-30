@@ -13,32 +13,27 @@ const PopularSection = () => {
   }, [dispatch, type]);
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div className="mt-5">
       
-   
-      <div style={{ marginBottom: "10px" }}>
+      <div className="mb-3 text-white ">
         {["streaming", "tv", "rent", "theaters"].map((tab) => (
           <button
             key={tab}
             onClick={() => dispatch(setType(tab))}
-            style={{
-              marginRight: "8px",
-              padding: "5px 10px",
-              cursor: "pointer",
-              background: type === tab ? "white" : "#333",
-              color: type === tab ? "black" : "white",
-              border: "none",
-            }}
+            className={`mr-2 px-3 py-1 cursor-pointer border-1
+              ${
+                type === tab
+                 
+              }`}
           >
             {tab}
           </button>
         ))}
       </div>
 
-      {/* Movies */}
-      <div style={{ display: "flex", gap: "10px", overflowX: "auto" }}>
+      <div className="flex gap-3 overflow-x-auto">
         {movies.map((movie: any) => (
-          <div key={movie.id} style={{ minWidth: "150px" }}>
+          <div key={movie.id} className="min-w-[150px]">
             <MovieCard movie={movie} imgBaseUrl={IMG_BASE_URL} />
           </div>
         ))}

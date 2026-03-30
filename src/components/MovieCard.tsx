@@ -17,7 +17,7 @@ const MovieCard = ({ movie, imgBaseUrl }: Props) => {
         console.log("clicked", movie.id);
         navigate(`/movie/${movie.id}`);
       }}
-      className="bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition duration-300 cursor-pointer"
+      className="cursor-pointer"
     >
       <img
       loading="lazy"
@@ -35,8 +35,8 @@ const MovieCard = ({ movie, imgBaseUrl }: Props) => {
           {title}
         </h2>
 
-        <div className="flex justify-between text-gray-400 text-xs mt-1">
-          <span>⭐ {movie.vote_average}</span>
+        <div className="flex justify-between text-white text-xs mt-1">
+          <span> {movie.vote_average}</span>
           <span>{date?.slice(0, 4)}</span>
         </div>
       </div>

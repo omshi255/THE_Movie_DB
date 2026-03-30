@@ -1,63 +1,42 @@
 import { useEffect, useState, useRef } from "react";
-import { fetchPopularPeople, IMG_BASE_URL } from "../api/tmdb";
+import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
+import { getPopularPeople } from "../features/people/peopleSlice";
+import { IMG_BASE_URL } from "../api/tmdb";
 
 const PopularPeople = () => {
-  const [people, setPeople] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { people, loading } = useAppSelector((state) => state.people);
 
+  const [page, setPage] = useState(1);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  // 🔥 Fetch data
-  const loadPeople = async () => {
-    setLoading(true);
+useEffect(() => {
+  dispatch(getPopularPeople(page));
+}, [dispatch, page]);
+useEffect(() => {
+  if (loading) return;
 
-    const data = await fetchPopularPeople(page);
-
-    setPeople((prev) => [...prev, ...(data?.results || [])]);
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadPeople();
-  }, [page]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !loading) {
-        setPage((prev) => prev + 1);
-      }
-    });
-
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      observer.disconnect(); 
+      setPage((prev) => prev + 1);
     }
+  });
 
-    return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
-      }
-    };
-  }, [loading]);
+  if (observerRef.current) {
+    observer.observe(observerRef.current);
+  }
+
+  return () => observer.disconnect();
+}, [loading]);
 
   return (
-    <div style={{ padding: "20px", background: "black", minHeight: "100vh" }}>
-      
-      <h2 style={{ color: "white", marginBottom: "20px" }}>
-        Popular People
-      </h2>
+    <div className="p-5 bg-black min-h-screen">
+      <h2 className="text-white text-xl mb-5">Popular People</h2>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        {people.map((person) => (
-          <div key={person.id} style={{ background: "#1f1f1f" }}>
-            
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
+        {people.map((person: any) => (
+          <div key={person.id} className="">
             <img
               loading="lazy"
               src={
@@ -65,15 +44,13 @@ const PopularPeople = () => {
                   ? `${IMG_BASE_URL}${person.profile_path}`
                   : "https://via.placeholder.com/150"
               }
-              style={{ width: "100%", height: "200px", objectFit: "cover" }}
+              className="w-full h-[200px] object-cover"
             />
 
-            <div style={{ padding: "8px" }}>
-              <p style={{ color: "white", fontSize: "14px" }}>
-                {person.name}
-              </p>
+            <div className="p-2">
+              <p className="text-white text-sm">{person.name}</p>
 
-              <p style={{ color: "gray", fontSize: "12px" }}>
+              <p className="text-gray-400 text-xs">
                 {person.known_for
                   ?.map((item: any) => item.title || item.name)
                   .join(", ")}
@@ -83,12 +60,10 @@ const PopularPeople = () => {
         ))}
       </div>
 
-      <div ref={observerRef} style={{ height: "50px" }} />
+      <div ref={observerRef} className="h-[50px]" />
 
       {loading && (
-        <p style={{ color: "white", textAlign: "center" }}>
-          Loading...
-        </p>
+        <p className="text-white text-center mt-4">Loading...</p>
       )}
     </div>
   );

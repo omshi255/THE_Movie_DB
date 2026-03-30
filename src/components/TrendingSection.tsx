@@ -20,11 +20,11 @@ const TrendingSection = () => {
   return (
     <div className="mt-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-white text-xl font-bold">
+        <h2 className=" text-xl font-bold">
           Trending
         </h2>
 
-        <div className="flex bg-gray-800 rounded-full overflow-hidden">
+        <div className="flex overflow-hidden">
           <button
             onClick={() => dispatch(setTime("day"))}
             className={`px-4 py-1 ${

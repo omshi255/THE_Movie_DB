@@ -75,7 +75,7 @@ const MovieDetails = () => {
             </p>
 
             <p className="text-sm text-gray-400">
-              ⭐ {movie.vote_average} | 📅 {movie.release_date}
+              {movie.vote_average} | {movie.release_date}
             </p>
           </div>
         </div>

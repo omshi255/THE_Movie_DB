@@ -6,13 +6,21 @@ const Movies = () => {
   const [movies, setMovies] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
-
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const load = async () => {
       const data = await fetchMovies(page);
-      setMovies((prev) => [...prev, ...(data.results || [])]);
+
+      setMovies((prev) => {
+        const newData = data.results || [];
+
+        const unique = newData.filter(
+          (item: any) => !prev.some((p: any) => p.id === item.id)
+        );
+
+        return [...prev, ...unique];
+      });
     };
 
     load();
@@ -31,29 +39,27 @@ const Movies = () => {
   }, []);
 
   return (
-    <div style={{ background: "black", minHeight: "100vh", padding: "20px" }}>
-      <h2 style={{ color: "white" }}>Movies</h2>
+    <div className="bg-black min-h-screen p-5">
+      <h2 className="text-white mb-4">Movies</h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,150px)", gap: "10px" }}>
-        {movies.map((m) => (
+      <div className="grid grid-cols-[repeat(auto-fill,150px)] gap-3">
+        {movies.map((m, index) => (
           <div
-            key={m.id}
-            onClick={() => navigate(`/movie/${m.id}`)} // ✅ CLICK FIX
-            style={{ cursor: "pointer" }}
+            key={`${m.id}-${index}`} 
+            onClick={() => navigate(`/movie/${m.id}`)}
+            className="cursor-pointer"
           >
             <img
               loading="lazy"
               src={`${IMG_BASE_URL}${m.poster_path}`}
-              style={{ width: "100%" }}
+              className="w-full"
             />
-            <p style={{ color: "white", fontSize: "12px" }}>
-              {m.title}
-            </p>
+            <p className="text-white text-xs">{m.title}</p>
           </div>
         ))}
       </div>
 
-      <div ref={observerRef} style={{ height: "40px" }} />
+      <div ref={observerRef} className="h-[40px]" />
     </div>
   );
 };

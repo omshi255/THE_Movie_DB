@@ -13,7 +13,18 @@ interface TVDetailsType {
   number_of_seasons: number;
   genres: { id: number; name: string }[];
 }
+type Cast = {
+  id: number;
+  name: string;
+  profile_path?: string;
+  character?: string;
+};
 
+type TV = {
+  id: number;
+  name?: string;
+  poster_path?: string;
+};
 const ArrowButton = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => (
   <button
     onClick={onClick}
@@ -32,8 +43,8 @@ const TVDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tv, setTv] = useState<TVDetailsType | null>(null);
-  const [cast, setCast] = useState<any[]>([]);
-  const [similar, setSimilar] = useState<any[]>([]);
+  const [cast, setCast] = useState<Cast[]>([]);
+  const [similar, setSimilar] = useState<TV[]>([]);
 
   const castScrollRef = useRef<HTMLDivElement>(null);
   const similarScrollRef = useRef<HTMLDivElement>(null);
@@ -55,10 +66,17 @@ const TVDetails = () => {
 
   if (!tv) return <p className="text-white p-5">Loading...</p>;
 
-  const scroll = (ref: React.RefObject<HTMLDivElement>, dir: "left" | "right") => {
-    ref.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
-  };
+ const scroll = (
+  ref: React.RefObject<HTMLDivElement | null>,
+  dir: "left" | "right"
+) => {
+  if (!ref.current) return;
 
+  ref.current.scrollBy({
+    left: dir === "left" ? -400 : 400,
+    behavior: "smooth",
+  });
+};
   return (
     <div className="bg-black min-h-screen text-white">
 

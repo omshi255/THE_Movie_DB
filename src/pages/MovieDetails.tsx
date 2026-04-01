@@ -6,7 +6,22 @@ import {
   fetchSimilarMovies,
   IMG_BASE_URL,
 } from "../api/tmdb";
+type Movie = {
+  id: number;
+  title?: string;
+  overview?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  vote_average: number;
+  release_date?: string;
+};
 
+type Cast = {
+  id: number;
+  name: string;
+  profile_path?: string;
+  character?: string;
+};
 const ArrowButton = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => (
   <button
     onClick={onClick}
@@ -25,9 +40,9 @@ const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [movie, setMovie] = useState<any>(null);
-  const [cast, setCast] = useState<any[]>([]);
-  const [similar, setSimilar] = useState<any[]>([]);
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [cast, setCast] = useState<Cast[]>([]);
+  const [similar, setSimilar] = useState<Movie[]>([]);
 
   const castScrollRef = useRef<HTMLDivElement>(null);
   const similarScrollRef = useRef<HTMLDivElement>(null);
@@ -47,9 +62,17 @@ const MovieDetails = () => {
     loadData();
   }, [id]);
 
-  const scroll = (ref: React.RefObject<HTMLDivElement>, dir: "left" | "right") => {
-    ref.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
-  };
+const scroll = (
+  ref: React.RefObject<HTMLDivElement | null>,
+  dir: "left" | "right"
+) => {
+  if (!ref.current) return;
+
+  ref.current.scrollBy({
+    left: dir === "left" ? -400 : 400,
+    behavior: "smooth",
+  });
+};
 
   if (!movie) return <h1 className="text-white p-10">Loading...</h1>;
 

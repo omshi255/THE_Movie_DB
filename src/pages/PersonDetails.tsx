@@ -6,7 +6,6 @@ import {
   IMG_BASE_URL,
 } from "../api/tmdb";
 
-// ✅ TYPES
 type Person = {
   id: number;
   name: string;
@@ -49,7 +48,6 @@ const PersonDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // ✅ no any
   const [person, setPerson] = useState<Person | null>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
 
@@ -76,8 +74,14 @@ const PersonDetails = () => {
     load();
   }, [id]);
 
-  const scroll = (dir: "left" | "right") => {
-    scrollRef.current?.scrollBy({
+  // ✅ FIXED SCROLL FUNCTION
+  const scroll = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    dir: "left" | "right"
+  ) => {
+    if (!ref.current) return;
+
+    ref.current.scrollBy({
       left: dir === "left" ? -400 : 400,
       behavior: "smooth",
     });
@@ -134,7 +138,11 @@ const PersonDetails = () => {
         <h2 className="text-2xl mb-4">Known For</h2>
 
         <div className="relative">
-          <ArrowButton direction="left" onClick={() => scroll("left")} />
+          {/* ✅ FIXED */}
+          <ArrowButton
+            direction="left"
+            onClick={() => scroll(scrollRef, "left")}
+          />
 
           <div
             ref={scrollRef}
@@ -162,7 +170,10 @@ const PersonDetails = () => {
             ))}
           </div>
 
-          <ArrowButton direction="right" onClick={() => scroll("right")} />
+          <ArrowButton
+            direction="right"
+            onClick={() => scroll(scrollRef, "right")}
+          />
         </div>
       </div>
     </div>

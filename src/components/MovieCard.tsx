@@ -1,7 +1,17 @@
 import { useNavigate } from "react-router-dom";
 
+type Movie = {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  vote_average: number;
+  release_date?: string;
+  first_air_date?: string;
+};
+
 type Props = {
-  movie: any;
+  movie: Movie;
   imgBaseUrl: string;
 };
 

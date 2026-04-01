@@ -4,6 +4,7 @@ import trendingReducer from "../features/trending/trendingSlice";
 import popularReducer from "../features/popular/popularSlice";
 import peopleReducer from "../features/people/peopleSlice";
 import tvReducer from "../features/tv/tvSlice"; 
+import searchReducer from "../features/search/searchSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,8 @@ export const store = configureStore({
     popular: popularReducer,
     people: peopleReducer,
     tv: tvReducer, 
+        search: searchReducer,
+
   },
 });
 

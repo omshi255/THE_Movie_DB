@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import SearchBar from "./SearchBar";
 const Navbar = () => {
   const navigate = useNavigate();
 
@@ -40,12 +40,9 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <button className="px-4 py-1 border rounded">Login</button>
-        <button className="px-4 py-1 bg-green-500 text-black rounded">
-          Join
-        </button>
-      </div>
+      
+      <SearchBar />
+
     </nav>
   );
 };

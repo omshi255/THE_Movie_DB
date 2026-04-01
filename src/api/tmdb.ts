@@ -3,15 +3,22 @@ import axios from "axios";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
-export const IMG_BASE_URL = "https://image.tmdb.org/t/p/w300";
-
+export const IMG_BASE_URL = "https://image.tmdb.org/t/p/original";
 const api = axios.create({
   baseURL: "https://api.themoviedb.org/3",
   params: {
     api_key: API_KEY,
   },
 });
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+}
 
+interface MoviesResponse {
+  results: Movie[];
+}
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -82,14 +89,13 @@ export const fetchMovieCredits = async (id: string) => {
   return res.data;
 };
 
-export const fetchMovies = async (page = 1) => {
+export const fetchMovies = async (page = 1): Promise<MoviesResponse> => {
   const res = await api.get("/movie/popular", {
     params: { page },
   });
   return res.data;
 };
-
-export const fetchTV = async (page = 1) => {
+export const fetchTV = async (page = 1): Promise<MoviesResponse> => {
   const res = await api.get("/tv/popular", {
     params: { page },
   });
@@ -105,5 +111,32 @@ export const fetchPopularPeople = async (page = 1) => {
   const res = await api.get("/person/popular", {
     params: { page },
   });
+  return res.data;
+};
+
+export const searchMulti = async (query: string) => {
+  const res = await api.get("/search/multi", {
+    params: { query, include_adult: false },
+  });
+  return res.data;
+};
+
+export const fetchTVCredits = async (id: string) => {
+  const res = await api.get(`/tv/${id}/credits`);
+  return res.data;
+};
+
+export const fetchSimilarTV = async (id: string) => {
+  const res = await api.get(`/tv/${id}/similar`);
+  return res.data;
+};
+
+export const fetchPersonDetails = async (id: string) => {
+  const res = await api.get(`/person/${id}`);
+  return res.data;
+};
+
+export const fetchPersonMovieCredits = async (id: string) => {
+  const res = await api.get(`/person/${id}/movie_credits`);
   return res.data;
 };

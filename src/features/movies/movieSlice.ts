@@ -1,8 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchMovies } from "../../api/tmdb";
 
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+}
+
+
 interface MovieState {
-  movies: any[];
+  movies: Movie[];
   page: number;
   loading: boolean;
   error: string | null;
@@ -15,11 +22,11 @@ const initialState: MovieState = {
   error: null,
 };
 
-export const getMovies = createAsyncThunk(
+export const getMovies = createAsyncThunk<Movie[], number>(
   "movies/getMovies",
   async (page: number) => {
     const data = await fetchMovies(page);
-    return data.results || [];
+    return data.results; // ✅ no fallback needed
   }
 );
 
@@ -44,9 +51,12 @@ const movieSlice = createSlice({
       })
       .addCase(getMovies.fulfilled, (state, action) => {
         state.loading = false;
+
+        // ✅ STEP 4: any hatao
         const unique = action.payload.filter(
-          (item: any) => !state.movies.some((m) => m.id === item.id)
+          (item) => !state.movies.some((m) => m.id === item.id)
         );
+
         state.movies = [...state.movies, ...unique];
       })
       .addCase(getMovies.rejected, (state) => {

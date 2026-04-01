@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchTrendingAll, IMG_BASE_URL } from "../api/tmdb";
-
+import SearchBar from "./SearchBar";
 interface Movie {
   id: number;
   title?: string;
@@ -46,6 +46,9 @@ const HeroBanner = () => {
         <h1 className="text-white text-4xl font-bold">
           {title}
         </h1>
+        <br/>
+
+        <SearchBar/>
       </div>
     </div>
   );

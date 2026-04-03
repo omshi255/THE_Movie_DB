@@ -1,27 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  fetchMovieDetails,
-  fetchMovieCredits,
-  fetchSimilarMovies,
-  IMG_BASE_URL,
-} from "../api/tmdb";
-type Movie = {
-  id: number;
-  title?: string;
-  overview?: string;
-  poster_path?: string;
-  backdrop_path?: string;
-  vote_average: number;
-  release_date?: string;
-};
+import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
+import { getMovieDetail } from "../features/movieddetails/movieDetailSlice";
+import { IMG_BASE_URL } from "../api/tmdb";
+import type { Movie, Cast } from "../features/movieddetails/movieDetailSlice";
 
-type Cast = {
-  id: number;
-  name: string;
-  profile_path?: string;
-  character?: string;
-};
+
 const ArrowButton = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => (
   <button
     onClick={onClick}
@@ -39,60 +23,39 @@ const ArrowButton = ({ direction, onClick }: { direction: "left" | "right"; onCl
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-  const [movie, setMovie] = useState<Movie | null>(null);
-  const [cast, setCast] = useState<Cast[]>([]);
-  const [similar, setSimilar] = useState<Movie[]>([]);
+  const { cache, loading } = useAppSelector((state) => state.movieDetail);
+  const data = id ? cache[id] : null;
 
-  const castScrollRef = useRef<HTMLDivElement>(null);
-  const similarScrollRef = useRef<HTMLDivElement>(null);
+  const castScrollRef = useRef<HTMLDivElement | null>(null);
+  const similarScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-    const loadData = async () => {
-      const [details, credits, similarData] = await Promise.all([
-        fetchMovieDetails(id),
-        fetchMovieCredits(id),
-        fetchSimilarMovies(id),
-      ]);
-      setMovie(details);
-      setCast(credits?.cast?.slice(0, 6) || []);
-      setSimilar(similarData?.results || []);
-    };
-    loadData();
-  }, [id]);
+    if (id) dispatch(getMovieDetail(id));
+  }, [id, dispatch]);
 
-const scroll = (
-  ref: React.RefObject<HTMLDivElement | null>,
-  dir: "left" | "right"
-) => {
-  if (!ref.current) return;
+  const scroll = (ref: React.RefObject<HTMLDivElement | null>, dir: "left" | "right") => {
+    ref.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
+  };
 
-  ref.current.scrollBy({
-    left: dir === "left" ? -400 : 400,
-    behavior: "smooth",
-  });
-};
+  if (loading || !data) return <h1 className="text-white p-10">Loading...</h1>;
 
-  if (!movie) return <h1 className="text-white p-10">Loading...</h1>;
+  const { movie, cast, similar } = data;
 
   return (
     <div className="bg-black text-white min-h-screen">
-
       {/* BACKDROP HERO */}
       <div
         className="w-full h-[70vh] bg-cover bg-center relative"
-        style={{
-          backgroundImage: movie.backdrop_path
-            ? `url(${IMG_BASE_URL}${movie.backdrop_path})`
-            : "none",
-        }}
+        style={{ backgroundImage: movie.backdrop_path ? `url(${IMG_BASE_URL}${movie.backdrop_path})` : "none" }}
       >
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 flex items-center gap-10 h-full px-10">
           <img
             loading="lazy"
             src={movie.poster_path ? `${IMG_BASE_URL}${movie.poster_path}` : "https://via.placeholder.com/200x300?text=No+Image"}
+            alt={movie.title || "Movie poster"}
             className="w-60 rounded shadow-lg"
           />
           <div>
@@ -109,11 +72,12 @@ const scroll = (
         <div className="relative">
           <ArrowButton direction="left" onClick={() => scroll(castScrollRef, "left")} />
           <div ref={castScrollRef} className="flex gap-4 overflow-x-auto pb-2 px-10" style={{ scrollbarWidth: "none" }}>
-            {cast.map((actor) => (
+            {cast.map((actor: Cast) => (
               <div key={actor.id} className="min-w-[120px]">
                 <img
                   loading="lazy"
                   src={actor.profile_path ? `${IMG_BASE_URL}${actor.profile_path}` : "https://via.placeholder.com/120x160?text=No+Image"}
+                  alt={actor.name}
                   className="w-full h-40 object-cover rounded"
                 />
                 <p className="text-sm mt-1">{actor.name}</p>
@@ -131,7 +95,7 @@ const scroll = (
         <div className="relative">
           <ArrowButton direction="left" onClick={() => scroll(similarScrollRef, "left")} />
           <div ref={similarScrollRef} className="flex gap-4 overflow-x-auto pb-2 px-10" style={{ scrollbarWidth: "none" }}>
-            {similar.map((item) => (
+            {similar.map((item: Movie) => (
               <div
                 key={item.id}
                 onClick={() => navigate(`/movie/${item.id}`)}
@@ -140,6 +104,7 @@ const scroll = (
                 <img
                   loading="lazy"
                   src={item.poster_path ? `${IMG_BASE_URL}${item.poster_path}` : "https://via.placeholder.com/150x220?text=No+Image"}
+                  alt={item.title || "Movie poster"}
                   className="w-full h-56 object-cover rounded"
                 />
                 <p className="text-sm mt-1">{item.title}</p>
@@ -149,7 +114,6 @@ const scroll = (
           <ArrowButton direction="right" onClick={() => scroll(similarScrollRef, "right")} />
         </div>
       </div>
-
     </div>
   );
 };

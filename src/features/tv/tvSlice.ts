@@ -1,12 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchTV } from "../../api/tmdb";
+import { fetchTVByCategory } from "../../api/tmdb";
+
+export type TVCategory = "popular" | "top_rated" | "on_the_air" | "airing_today";
+
+interface TVShow {
+  id: number;
+  name: string;
+  poster_path: string;
+}
 
 interface TVState {
-  shows: any[];
+  shows: TVShow[];
   page: number;
   loading: boolean;
   error: string | null;
+  category: TVCategory;
+  fetchedPages: Record<string, number[]>;
 }
 
 const initialState: TVState = {
@@ -14,13 +23,26 @@ const initialState: TVState = {
   page: 1,
   loading: false,
   error: null,
+  category: "popular",
+  fetchedPages: {},
 };
 
-export const getTV = createAsyncThunk(
+export const getTV = createAsyncThunk<
+  { results: TVShow[]; page: number; category: TVCategory },
+  { page: number; category: TVCategory },
+  { state: { tv: TVState } }
+>(
   "tv/getTV",
-  async (page: number) => {
-    const data = await fetchTV(page);
-    return data.results || [];
+  async ({ page, category }, { getState, rejectWithValue }) => {
+    const state = getState().tv;
+    const fetched = state.fetchedPages[category] || [];
+
+    if (fetched.includes(page)) {
+      return rejectWithValue("already_fetched");
+    }
+
+    const data = await fetchTVByCategory(category, page);
+    return { results: data.results || [], page, category };
   }
 );
 
@@ -31,10 +53,22 @@ const tvSlice = createSlice({
     incrementTVPage: (state) => {
       state.page += 1;
     },
+    setTVCategory: (state, action: { payload: TVCategory }) => {
+      if (state.category !== action.payload) {
+        state.category = action.payload;
+        state.shows = [];
+        state.page = 1;
+        state.error = null;
+        state.loading = false;
+      }
+    },
     resetTV: (state) => {
       state.shows = [];
       state.page = 1;
       state.error = null;
+      state.loading = false;
+      state.fetchedPages = {};
+      state.category = "popular";
     },
   },
   extraReducers: (builder) => {
@@ -45,17 +79,26 @@ const tvSlice = createSlice({
       })
       .addCase(getTV.fulfilled, (state, action) => {
         state.loading = false;
-        const unique = action.payload.filter(
-          (item: any) => !state.shows.some((s) => s.id === item.id)
+        const { results, page, category } = action.payload;
+
+        if (!state.fetchedPages[category]) state.fetchedPages[category] = [];
+        if (!state.fetchedPages[category].includes(page)) {
+          state.fetchedPages[category].push(page);
+        }
+
+        const unique = results.filter(
+          (item) => !state.shows.some((s) => s.id === item.id)
         );
         state.shows = [...state.shows, ...unique];
       })
-      .addCase(getTV.rejected, (state) => {
+      .addCase(getTV.rejected, (state, action) => {
         state.loading = false;
-        state.error = "Failed to fetch TV shows";
+        if (action.payload !== "already_fetched") {
+          state.error = "Failed to fetch TV shows";
+        }
       });
   },
 });
 
-export const { incrementTVPage, resetTV } = tvSlice.actions;
+export const { incrementTVPage, setTVCategory, resetTV } = tvSlice.actions;
 export default tvSlice.reducer;

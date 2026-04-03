@@ -5,7 +5,8 @@ import popularReducer from "../features/popular/popularSlice";
 import peopleReducer from "../features/people/peopleSlice";
 import tvReducer from "../features/tv/tvSlice"; 
 import searchReducer from "../features/search/searchSlice";
-
+import movieDetailReducer from "../features/movieddetails/movieDetailSlice";
+import tvDetailReducer from "../features/tvdetails/tvDetailSlice"; 
 export const store = configureStore({
   reducer: {
     movie: movieReducer,
@@ -14,6 +15,8 @@ export const store = configureStore({
     people: peopleReducer,
     tv: tvReducer, 
         search: searchReducer,
+         movieDetail: movieDetailReducer,
+             tvDetail: tvDetailReducer,
 
   },
 });

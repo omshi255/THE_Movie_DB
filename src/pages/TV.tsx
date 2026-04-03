@@ -1,8 +1,16 @@
 import { Suspense, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
-import { getTV, incrementTVPage, resetTV } from "../features/tv/tvSlice";
+import { getTV, incrementTVPage, resetTV, setTVCategory } from "../features/tv/tvSlice";
+import type { TVCategory } from "../features/tv/tvSlice";
 import { IMG_BASE_URL } from "../api/tmdb";
+
+const CATEGORY_LABELS: Record<TVCategory, string> = {
+  popular:      "Popular TV Shows",
+  top_rated:    "Top Rated TV Shows",
+  on_the_air:   "On TV",
+  airing_today: "Airing Today",
+};
 
 const SkeletonCard = () => (
   <div className="animate-pulse">
@@ -16,9 +24,7 @@ const TVSkeletonFallback = () => (
   <div className="bg-black min-h-screen p-5">
     <div className="h-7 w-32 bg-zinc-800 rounded mb-4 animate-pulse" />
     <div className="grid grid-cols-[repeat(auto-fill,150px)] gap-3">
-      {Array.from({ length: 18 }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
+      {Array.from({ length: 18 }).map((_, i) => <SkeletonCard key={i} />)}
     </div>
   </div>
 );
@@ -32,7 +38,10 @@ const Spinner = () => (
 const TVContent = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { shows, page, loading } = useAppSelector((state) => state.tv);
+  const [searchParams] = useSearchParams();
+  const categoryFromURL = (searchParams.get("category") || "popular") as TVCategory;
+
+  const { shows, page, loading, category } = useAppSelector((state) => state.tv);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -42,10 +51,15 @@ const TVContent = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(getTV(page));
-  }, [page]);
+    dispatch(setTVCategory(categoryFromURL));
+  }, [categoryFromURL, dispatch]);
 
   useEffect(() => {
+    dispatch(getTV({ page, category }));
+  }, [page, category, dispatch]);
+
+  useEffect(() => {
+    if (loading) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && !loading) {
         dispatch(incrementTVPage());
@@ -53,13 +67,15 @@ const TVContent = () => {
     });
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [loading]);
+  }, [loading, dispatch]);
 
   const isInitialLoad = loading && shows.length === 0;
 
   return (
     <div className="bg-black min-h-screen p-5">
-      <h2 className="text-white mb-4">TV Shows</h2>
+      <h2 className="text-white text-2xl font-bold mb-6">
+        {CATEGORY_LABELS[category] || "TV Shows"}
+      </h2>
 
       <div className="grid grid-cols-[repeat(auto-fill,150px)] gap-3">
         {shows.map((t) => (

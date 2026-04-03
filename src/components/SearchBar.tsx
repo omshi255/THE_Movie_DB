@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IMG_BASE_URL } from "../api/tmdb";
@@ -27,7 +28,6 @@ const SearchBar = () => {
   useEffect(() => {
     if (!query.trim()) {
       dispatch(clearResults());
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowDropdown(false);
       return;
     }
@@ -66,21 +66,32 @@ const SearchBar = () => {
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Input */}
       <div
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200"
         style={{
-          background: focused ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
-          border: focused ? "1.5px solid rgba(1,180,228,0.8)" : "1.5px solid rgba(255,255,255,0.15)",
-          borderRadius: hasResults || noResults ? "12px 12px 0 0" : "12px",
-          boxShadow: focused ? "0 0 0 3px rgba(1,180,228,0.15)" : "none",
+          background: focused
+            ? "rgba(255, 255, 255, 0.18)"
+            : "rgba(255, 255, 255, 0.10)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: focused
+            ? "1.5px solid rgba(255, 255, 255, 0.6)"
+            : "1.5px solid rgba(255, 255, 255, 0.25)",
+          borderRadius: hasResults || noResults ? "20px 20px 0 0" : "20px",
+          boxShadow: focused
+            ? "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)"
+            : "0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+          transition: "all 0.3s ease",
+          padding: "12px 18px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
         }}
       >
-        {/* Search icon */}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke={focused ? "#01b4e4" : "rgba(255,255,255,0.4)"}
+        <svg
+          width="17" height="17" viewBox="0 0 24 24" fill="none"
+          stroke={focused ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)"}
           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          style={{ flexShrink: 0, transition: "stroke 0.2s" }}
+          style={{ flexShrink: 0, transition: "stroke 0.3s" }}
         >
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -92,80 +103,135 @@ const SearchBar = () => {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
           placeholder="Search movies, shows, people..."
-          className="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder-white/40"
+          style={{
+            flex: 1,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: "white",
+            fontSize: "15px",
+            fontWeight: 400,
+            letterSpacing: "0.2px",
+          }}
+          className="placeholder-white/40"
         />
 
-        {/* Spinner */}
         {loading && (
-          <div className="w-4 h-4 border-2 border-white/20 border-t-[#01b4e4] rounded-full animate-spin flex-shrink-0" />
+          <div
+            className="flex-shrink-0"
+            style={{
+              width: 16, height: 16,
+              border: "2px solid rgba(255,255,255,0.2)",
+              borderTop: "2px solid white",
+              borderRadius: "50%",
+              animation: "spin 0.7s linear infinite",
+            }}
+          />
         )}
 
-        {/* Clear button */}
         {query && !loading && (
           <button
             onClick={() => { setQuery(""); dispatch(clearResults()); inputRef.current?.focus(); }}
-            className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0"
+            style={{
+              width: 22, height: 22,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(4px)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", flexShrink: 0,
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.25)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
           >
-            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none"
+              stroke="white" strokeWidth="3" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         )}
       </div>
 
-      {/* Dropdown */}
       {hasResults && (
         <div
-          className="absolute left-0 right-0 z-50 overflow-y-auto"
           style={{
+            position: "absolute",
+            left: 0, right: 0,
             top: "100%",
-            background: "rgba(10,12,20,0.97)",
-            border: "1.5px solid rgba(1,180,228,0.3)",
-            borderTop: "none",
-            borderRadius: "0 0 12px 12px",
-            maxHeight: "380px",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.8)",
+            zIndex: 50,
+            background: "rgba(10, 15, 30, 0.75)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "0 0 20px 20px",
+            maxHeight: 380,
+            overflowY: "auto",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
           }}
         >
-          <div className="h-px bg-white/5 mx-4" />
+          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "0 16px" }} />
+
           {results.slice(0, 8).map((item, idx) => {
             const title = item.title || item.name || "Unknown";
             const image = item.poster_path || item.profile_path;
-            const year = (item as SearchResult & { release_date?: string }).release_date?.slice(0, 4)
-              || (item as SearchResult & { first_air_date?: string }).first_air_date?.slice(0, 4);
+            const year =
+              (item as SearchResult & { release_date?: string }).release_date?.slice(0, 4) ||
+              (item as SearchResult & { first_air_date?: string }).first_air_date?.slice(0, 4);
 
             return (
               <div
                 key={item.id}
                 onClick={() => handleSelect(item)}
-                className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-[#01b4e4]/10 transition-colors"
-                style={{ borderBottom: idx < results.slice(0, 8).length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                  borderBottom: idx < Math.min(results.length, 8) - 1
+                    ? "1px solid rgba(255,255,255,0.05)"
+                    : "none",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                {/* Poster */}
-                <div className="w-9 h-12 rounded-md overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
+                <div style={{
+                  width: 36, height: 48, borderRadius: 8, overflow: "hidden",
+                  flexShrink: 0, background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}>
                   <img
                     src={image ? `${IMG_BASE_URL}${image}` : "https://via.placeholder.com/36x48/111/444?text=?"}
                     alt={title}
-                    className="w-full h-full object-cover"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{title}</p>
-                  {year && <p className="text-white/40 text-xs mt-0.5">{year}</p>}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    color: "white", fontSize: 14, fontWeight: 500,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>{title}</p>
+                  {year && (
+                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 2 }}>
+                      {year}
+                    </p>
+                  )}
                 </div>
 
-                {/* Type badge */}
                 {item.media_type && (
-                  <span
-                    className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded flex-shrink-0"
-                    style={{
-                      color: mediaTypeColor[item.media_type] || "#fff",
-                      background: `${mediaTypeColor[item.media_type]}20`,
-                      border: `1px solid ${mediaTypeColor[item.media_type]}40`,
-                    }}
-                  >
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: 1,
+                    padding: "2px 6px", borderRadius: 4, flexShrink: 0,
+                    color: mediaTypeColor[item.media_type] || "#fff",
+                    background: `${mediaTypeColor[item.media_type]}20`,
+                    border: `1px solid ${mediaTypeColor[item.media_type]}50`,
+                  }}>
                     {item.media_type.toUpperCase()}
                   </span>
                 )}
@@ -174,27 +240,31 @@ const SearchBar = () => {
           })}
 
           {results.length > 8 && (
-            <p className="text-center text-white/30 text-xs py-2">
+            <p style={{
+              textAlign: "center", color: "rgba(255,255,255,0.25)",
+              fontSize: 12, padding: "8px 0",
+            }}>
               +{results.length - 8} more results
             </p>
           )}
         </div>
       )}
 
-      {/* No results */}
       {noResults && (
-        <div
-          className="absolute left-0 right-0 z-50 px-4 py-5 text-center"
-          style={{
-            top: "100%",
-            background: "rgba(10,12,20,0.97)",
-            border: "1.5px solid rgba(1,180,228,0.3)",
-            borderTop: "none",
-            borderRadius: "0 0 12px 12px",
-          }}
-        >
-          <p className="text-white/30 text-sm">
-            No results for "<span className="text-white">{query}</span>"
+        <div style={{
+          position: "absolute", left: 0, right: 0, top: "100%", zIndex: 50,
+          background: "rgba(10,15,30,0.75)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1.5px solid rgba(255,255,255,0.15)",
+          borderTop: "none",
+          borderRadius: "0 0 20px 20px",
+          padding: "20px 16px",
+          textAlign: "center",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+        }}>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>
+            No results for "<span style={{ color: "white" }}>{query}</span>"
           </p>
         </div>
       )}

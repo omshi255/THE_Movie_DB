@@ -1,53 +1,6 @@
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// import { fetchPopularByType } from "../../api/tmdb";
-
-// interface PopularState {
-//   movies: unknown[];
-//   loading: boolean;
-//   type: string;
-// }
-
-// const initialState: PopularState = {
-//   movies: [],
-//   loading: false,
-//   type: "streaming",
-// };
-
-// export const getPopular = createAsyncThunk(
-//   "popular/getPopular",
-//   async (type: string) => {
-//     const data = await fetchPopularByType(type);
-//     return data.results;
-//   }
-// );
-
-// const popularSlice = createSlice({
-//   name: "popular",
-//   initialState,
-//   reducers: {
-//     setType: (state, action) => {
-//       state.type = action.payload;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(getPopular.pending, (state) => {
-//         state.loading = true;
-//       })
-//       .addCase(getPopular.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.movies = action.payload;
-//       });
-//   },
-// });
-
-// export const { setType } = popularSlice.actions;
-// export default popularSlice.reducer;
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchPopularByType } from "../../api/tmdb";
 
-// ✅ Movie type
 interface Movie {
   id: number;
   title?: string;
@@ -62,20 +15,31 @@ interface PopularState {
   movies: Movie[];
   type: string;
   loading: boolean;
+  cache: Record<string, Movie[]>; 
 }
 
 const initialState: PopularState = {
   movies: [],
   type: "streaming",
   loading: false,
+  cache: {}, 
 };
 
-// ✅ thunk typed
-export const getPopular = createAsyncThunk<Movie[], string>(
+export const getPopular = createAsyncThunk<
+  { results: Movie[]; type: string },
+  string,
+  { state: { popular: PopularState } }
+>(
   "popular/getPopular",
-  async (type: string) => {
+  async (type, { getState, rejectWithValue }) => {
+    const state = getState().popular;
+
+    if (state.cache[type]) {
+      return rejectWithValue("already_cached");
+    }
+
     const data = await fetchPopularByType(type);
-    return data.results;
+    return { results: data.results, type };
   }
 );
 
@@ -85,20 +49,31 @@ const popularSlice = createSlice({
   reducers: {
     setType: (state, action) => {
       state.type = action.payload;
-      state.movies = []; // reset on tab change
+
+      if (state.cache[action.payload]) {
+        state.movies = state.cache[action.payload];
+      } else {
+        state.movies = []; // clear for fresh fetch
+      }
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(getPopular.pending, (state) => {
-        state.loading = true;
+        if (!state.cache[state.type]) {
+          state.loading = true;
+        }
       })
       .addCase(getPopular.fulfilled, (state, action) => {
         state.loading = false;
-        state.movies = action.payload;
+        state.movies = action.payload.results;
+        state.cache[action.payload.type] = action.payload.results;
       })
-      .addCase(getPopular.rejected, (state) => {
+      .addCase(getPopular.rejected, (state, action) => {
         state.loading = false;
+        if (action.payload !== "already_cached") {
+          console.error("Failed to fetch popular:", action.error);
+        }
       });
   },
 });

@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import SearchBar from "./SearchBar";
 const Navbar = () => {
   const navigate = useNavigate();
 
@@ -41,7 +40,7 @@ const Navbar = () => {
       </div>
 
       
-      <SearchBar />
+
 
     </nav>
   );

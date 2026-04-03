@@ -13,22 +13,26 @@ interface Movie {
   release_date?: string;
   first_air_date?: string;
 }
+
+const SkeletonCard = () => (
+  <div className="min-w-[150px] animate-pulse">
+    <div className="w-full h-[220px] bg-zinc-800 rounded-lg" />
+    <div className="mt-2 h-3 bg-zinc-700 rounded w-3/4" />
+    <div className="mt-1 h-3 bg-zinc-700 rounded w-1/2" />
+  </div>
+);
+
 const PopularSection = () => {
   const dispatch = useAppDispatch();
-  const { movies, type } = useAppSelector((state) => state.popular);
+  const { movies, type, loading } = useAppSelector((state) => state.popular); // ✅ loading added
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dispatch(getPopular(type));
   }, [dispatch, type]);
 
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -400, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 400, behavior: "smooth" });
-  };
+  const scrollLeft = () => scrollRef.current?.scrollBy({ left: -400, behavior: "smooth" });
+  const scrollRight = () => scrollRef.current?.scrollBy({ left: 400, behavior: "smooth" });
 
   return (
     <div className="mt-5">
@@ -38,10 +42,9 @@ const PopularSection = () => {
             key={tab}
             onClick={() => dispatch(setType(tab))}
             className={`mr-2 px-3 py-1 cursor-pointer rounded-full border text-sm
-              ${
-                type === tab
-                  ? "bg-white text-black border-white"
-                  : "bg-transparent text-white border-gray-500"
+              ${type === tab
+                ? "bg-white text-black border-white"
+                : "bg-transparent text-white border-gray-500"
               }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -64,7 +67,11 @@ const PopularSection = () => {
           className="flex gap-3 overflow-x-auto px-10"
           style={{ scrollbarWidth: "none" }}
         >
-          {movies.slice(0, 10).map((movie: Movie) => (
+          {loading && Array.from({ length: 10 }).map((_, i) => (
+            <SkeletonCard key={`skeleton-${i}`} />
+          ))}
+
+          {!loading && movies.slice(0, 10).map((movie: Movie) => (
             <div key={movie.id} className="min-w-[150px]">
               <MovieCard movie={movie} imgBaseUrl={IMG_BASE_URL} />
             </div>

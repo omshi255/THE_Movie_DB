@@ -140,3 +140,17 @@ export const fetchPersonMovieCredits = async (id: string) => {
   const res = await api.get(`/person/${id}/movie_credits`);
   return res.data;
 };
+
+export const fetchMoviesByCategory = async (category: string, page = 1) => {
+  const validCategories = ["popular", "now_playing", "upcoming", "top_rated"];
+  const endpoint = validCategories.includes(category) ? category : "popular";
+  const res = await api.get(`/movie/${endpoint}`, { params: { page } });
+  return res.data;
+};
+
+export const fetchTVByCategory = async (category: string, page = 1) => {
+  const validCategories = ["popular", "airing_today", "on_the_air", "top_rated"];
+  const endpoint = validCategories.includes(category) ? category : "popular";
+  const res = await api.get(`/tv/${endpoint}`, { params: { page } });
+  return res.data;
+};

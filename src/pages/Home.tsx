@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
 import { getMovies } from "../features/movies/movieSlice";
@@ -14,7 +15,7 @@ const Home = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    dispatch(getMovies(1));
+    dispatch(getMovies({ page: 1, category: "popular" }));
   }, [dispatch]);
 
   const scrollLeft = () => {

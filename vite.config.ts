@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'Your App Name',
+        name: 'CineSpark',
         short_name: 'App',
-        description: 'Your app description',
+        description: 'Browse movies, TV shows and popular people powered by TMDB',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',

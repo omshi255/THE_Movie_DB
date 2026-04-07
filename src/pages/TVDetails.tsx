@@ -15,25 +15,10 @@ const ArrowButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="absolute top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black text-white rounded-full w-9 h-9 flex items-center justify-center"
-    style={{ [direction]: 0 }}
+    className="absolute top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black text-white rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center shadow-lg transition-colors duration-200"
+    style={{ [direction]: "6px" }}
   >
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {direction === "left" ? (
-        <polyline points="15 18 9 12 15 6" />
-      ) : (
-        <polyline points="9 18 15 12 9 6" />
-      )}
-    </svg>
+    {direction === "left" ? "‹" : "›"}
   </button>
 );
 
@@ -47,10 +32,9 @@ const TVDetails = () => {
   const tvId = Number(id);
   const tv = cache[tvId];
 
-  const castScrollRef = useRef<HTMLDivElement | null>(null);
-  const similarScrollRef = useRef<HTMLDivElement | null>(null);
+  const castRef = useRef<HTMLDivElement | null>(null);
+  const similarRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Single useEffect — movie cache clear + tv fetch
   useEffect(() => {
     if (!tvId) return;
     dispatch(clearMovieDetailCache());
@@ -61,7 +45,10 @@ const TVDetails = () => {
     ref: React.RefObject<HTMLDivElement | null>,
     dir: "left" | "right"
   ) => {
-    ref.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
+    ref.current?.scrollBy({
+      left: dir === "left" ? -250 : 250,
+      behavior: "smooth",
+    });
   };
 
   if (loading)
@@ -84,127 +71,180 @@ const TVDetails = () => {
   const similar: TvDetail[] = tv.similar?.results ?? [];
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-[#0a0a0a] text-white min-h-screen">
 
-      {/* Hero */}
+      {/* ── HERO BACKDROP ── */}
       <div
-        className="w-full h-[70vh] bg-cover bg-center relative"
+        className="w-full min-h-[420px] sm:min-h-[500px] md:min-h-[65vh] lg:min-h-[75vh] bg-cover bg-center bg-no-repeat relative"
         style={{
           backgroundImage: tv.backdrop_path
             ? `url(${IMG_BASE_URL}${tv.backdrop_path})`
             : "none",
-          backgroundColor: tv.backdrop_path ? "transparent" : "#111",
         }}
       >
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex items-center gap-10 h-full px-10">
-          <img
-            loading="lazy"
-            src={
-              tv.poster_path
-                ? `${IMG_BASE_URL}${tv.poster_path}`
-                : "https://via.placeholder.com/200x300?text=No+Image"
-            }
-            className="w-52 rounded shadow-lg"
-            alt={tv.name}
-          />
-          <div>
-            <h1 className="text-4xl font-bold mb-3">{tv.name}</h1>
-            {tv.tagline && (
-              <p className="text-gray-400 italic text-sm mb-2">{tv.tagline}</p>
-            )}
-            <p className="text-gray-300 max-w-xl mb-3">{tv.overview}</p>
-            <p className="text-sm text-gray-400">
-              ⭐ {tv.vote_average.toFixed(1)} &nbsp;|&nbsp; {tv.first_air_date}
-            </p>
-            {tv.number_of_seasons && (
-              <p className="text-sm text-gray-400 mt-1">
-                {tv.number_of_seasons} Season{tv.number_of_seasons > 1 ? "s" : ""}
-                &nbsp;·&nbsp;
-                {tv.number_of_episodes} Episodes
+        {/* Single combined overlay — dark left/bottom, image visible right */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.92) 25%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.15) 100%), linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 35%, transparent 70%)",
+          }}
+        />
+
+        <div
+          className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-20
+                      min-h-[420px] sm:min-h-[500px] md:min-h-[65vh] lg:min-h-[75vh]
+                      flex flex-col justify-center"
+        >
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:gap-8 md:gap-12">
+
+            {/* POSTER */}
+            <div className="flex-shrink-0 w-32 sm:w-44 md:w-56 lg:w-64">
+              <img
+                loading="lazy"
+                src={
+                  tv.poster_path
+                    ? `${IMG_BASE_URL}${tv.poster_path}`
+                    : "https://via.placeholder.com/300x450"
+                }
+                alt={tv.name}
+                className="w-full aspect-[2/3] object-cover rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.8)] ring-2 ring-white/15"
+              />
+            </div>
+
+            {/* INFO */}
+            <div className="text-center sm:text-left flex-1 min-w-0 pb-1">
+
+              {/* Title */}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 sm:mb-2 leading-tight tracking-tight">
+                {tv.name}
+              </h1>
+
+              {/* Tagline */}
+              {tv.tagline && (
+                <p className="text-gray-400 italic text-xs sm:text-sm mb-3 sm:mb-4">
+                  "{tv.tagline}"
+                </p>
+              )}
+
+              {/* Overview */}
+              <p className="text-gray-300 text-xs sm:text-sm md:text-base mb-4 sm:mb-5 leading-relaxed line-clamp-3 sm:line-clamp-4 md:line-clamp-none max-w-2xl">
+                {tv.overview}
               </p>
-            )}
-            {tv.status && (
-              <p className="text-sm text-gray-400 mt-1">
-                Status: <span className="text-white">{tv.status}</span>
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {tv.genres?.map((g) => (
-                <span key={g.id} className="text-xs px-3 py-1 bg-gray-700 rounded-full">
-                  {g.name}
+
+              {/* Rating & Date */}
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-3 gap-y-1 text-xs sm:text-sm mb-2">
+                <span className="flex items-center gap-1 text-yellow-400 font-semibold">
+                  ⭐ {tv.vote_average.toFixed(1)}
                 </span>
-              ))}
+                <span className="text-gray-600">•</span>
+                <span className="text-gray-300">{tv.first_air_date}</span>
+              </div>
+
+              {/* Seasons & Episodes */}
+              {tv.number_of_seasons && (
+                <p className="text-xs sm:text-sm text-gray-400 font-medium mb-4">
+                  {tv.number_of_seasons} Season(s) &nbsp;·&nbsp; {tv.number_of_episodes} Episodes
+                </p>
+              )}
+
+              {/* Genre Badges */}
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-1">
+                {tv.genres?.map((g) => (
+                  <span
+                    key={g.id}
+                    className="text-xs px-3 py-1 broder rounded-full  cursor-default"
+                  >
+                    {g.name}
+                  </span>
+                ))}
+              </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cast */}
+      {/* ── CAST ── */}
       {cast.length > 0 && (
-        <div className="px-10 mt-10">
-          <h2 className="text-2xl font-semibold mb-4">Cast</h2>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Cast</h2>
+
           <div className="relative">
-            <ArrowButton direction="left" onClick={() => scroll(castScrollRef, "left")} />
+            <ArrowButton direction="left" onClick={() => scroll(castRef, "left")} />
+
             <div
-              ref={castScrollRef}
-              className="flex gap-4 overflow-x-auto pb-2 px-10"
+              ref={castRef}
+              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 scroll-smooth"
               style={{ scrollbarWidth: "none" }}
             >
               {cast.map((actor) => (
-                <div key={actor.id} className="min-w-[120px]">
-                  <img
-                    loading="lazy"
-                    src={
-                      actor.profile_path
-                        ? `${IMG_BASE_URL}${actor.profile_path}`
-                        : "https://via.placeholder.com/120x160?text=No+Image"
-                    }
-                    className="w-full h-40 object-cover rounded"
-                    alt={actor.name}
-                  />
-                  <p className="text-sm mt-1">{actor.name}</p>
-                  <p className="text-xs text-gray-400">{actor.character}</p>
+                <div
+                  key={actor.id}
+                  className="min-w-[90px] sm:min-w-[115px] md:min-w-[130px] flex-shrink-0 group"
+                >
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      loading="lazy"
+                      src={
+                        actor.profile_path
+                          ? `${IMG_BASE_URL}${actor.profile_path}`
+                          : "https://via.placeholder.com/120x160"
+                      }
+                      className="w-full h-[120px] sm:h-[155px] md:h-[175px] object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      alt={actor.name}
+                    />
+                  </div>
+                  <p className="text-xs sm:text-sm mt-1.5 font-semibold leading-snug">{actor.name}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-snug mt-0.5">
+                    {actor.character}
+                  </p>
                 </div>
               ))}
             </div>
-            <ArrowButton direction="right" onClick={() => scroll(castScrollRef, "right")} />
+
+            <ArrowButton direction="right" onClick={() => scroll(castRef, "right")} />
           </div>
         </div>
       )}
 
-      {/* Similar TV Shows */}
+      {/* ── SIMILAR SHOWS ── */}
       {similar.length > 0 && (
-        <div className="px-10 mt-10 pb-10">
-          <h2 className="text-2xl font-semibold mb-4">Similar TV Shows</h2>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12 pb-12 sm:pb-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Similar Shows</h2>
+
           <div className="relative">
-            <ArrowButton direction="left" onClick={() => scroll(similarScrollRef, "left")} />
+            <ArrowButton direction="left" onClick={() => scroll(similarRef, "left")} />
+
             <div
-              ref={similarScrollRef}
-              className="flex gap-4 overflow-x-auto pb-2 px-10"
+              ref={similarRef}
+              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 scroll-smooth"
               style={{ scrollbarWidth: "none" }}
             >
               {similar.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => navigate(`/tv/${item.id}`)}
-                  className="min-w-[150px] cursor-pointer hover:scale-105 transition"
+                  className="min-w-[100px] sm:min-w-[140px] md:min-w-[155px] flex-shrink-0 cursor-pointer group"
                 >
-                  <img
-                    loading="lazy"
-                    src={
-                      item.poster_path
-                        ? `${IMG_BASE_URL}${item.poster_path}`
-                        : "https://via.placeholder.com/150x220?text=No+Image"
-                    }
-                    className="w-full h-56 object-cover rounded"
-                    alt={item.name}
-                  />
-                  <p className="text-sm mt-1">{item.name}</p>
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      loading="lazy"
+                      src={
+                        item.poster_path
+                          ? `${IMG_BASE_URL}${item.poster_path}`
+                          : "https://via.placeholder.com/150x220"
+                      }
+                      className="w-full h-[145px] sm:h-[205px] md:h-[225px] object-cover group-hover:scale-105 transition-transform duration-300"
+                      alt={item.name}
+                    />
+                  </div>
+                  <p className="text-xs sm:text-sm mt-1.5 font-medium leading-snug">{item.name}</p>
                 </div>
               ))}
             </div>
-            <ArrowButton direction="right" onClick={() => scroll(similarScrollRef, "right")} />
+
+            <ArrowButton direction="right" onClick={() => scroll(similarRef, "right")} />
           </div>
         </div>
       )}

@@ -14,9 +14,10 @@ type Person = {
   }[];
 };
 
+/* ✅ Responsive Skeleton */
 const SkeletonCard = () => (
   <div className="animate-pulse">
-    <div className="w-full h-[200px] bg-zinc-800 rounded-md" />
+    <div className="w-full aspect-[2/3] bg-zinc-800 rounded-lg" />
     <div className="p-2">
       <div className="h-3 bg-zinc-700 rounded w-3/4 mb-1" />
       <div className="h-3 bg-zinc-700 rounded w-1/2" />
@@ -44,12 +45,14 @@ const PopularPeople = () => {
 
   useEffect(() => {
     if (loading) return;
+
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         observer.disconnect();
         setPage((prev) => prev + 1);
       }
     });
+
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
   }, [loading]);
@@ -57,48 +60,77 @@ const PopularPeople = () => {
   const isInitialLoad = loading && people.length === 0;
 
   return (
-    <div className="p-5 bg-black min-h-screen">
-      <h2 className="text-white text-xl mb-5">Popular People</h2>
+    <div className="bg-black min-h-screen px-3 sm:px-5 md:px-8 lg:px-10 py-5">
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-        {/* Real cards */}
+      {/* Title */}
+      <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6">
+        Popular People
+      </h2>
+
+      {/* Grid */}
+      <div className="
+        grid gap-3 sm:gap-4
+        grid-cols-2 
+        sm:grid-cols-3 
+        md:grid-cols-4 
+        lg:grid-cols-5 
+        xl:grid-cols-6 
+        2xl:grid-cols-8
+      ">
+
+        {/* Cards */}
         {people.map((person: Person) => (
           <div
             key={person.id}
-            className="cursor-pointer"
             onClick={() => navigate(`/people/${person.id}`)}
+            className="cursor-pointer group"
           >
             <img
               loading="lazy"
               src={
                 person.profile_path
                   ? `${IMG_BASE_URL}${person.profile_path}`
-                  : "https://via.placeholder.com/150x200?text=No+Image"
+                  : "https://via.placeholder.com/300x450?text=No+Image"
               }
-              className="w-full h-[200px] object-cover rounded-md"
+              alt={person.name}
+              className="
+                w-full aspect-[2/3] object-cover rounded-lg
+                transition-transform duration-300 
+                group-hover:scale-105
+              "
             />
-            <div className="p-2">
-              <p className="text-white text-sm">{person.name}</p>
-              <p className="text-gray-400 text-xs">
-                {person.known_for?.map((item) => item.title || item.name).join(", ")}
+
+            <div className="mt-1">
+              <p className="text-white text-[10px] sm:text-xs md:text-sm font-medium">
+                {person.name}
+              </p>
+
+              <p className="
+                text-gray-400 text-[9px] sm:text-xs 
+                line-clamp-2
+              ">
+                {person.known_for
+                  ?.map((item) => item.title || item.name)
+                  .join(", ")}
               </p>
             </div>
           </div>
         ))}
 
-        {/* Initial load skeletons */}
+        {/* Initial Skeleton */}
         {isInitialLoad &&
           Array.from({ length: 18 }).map((_, i) => (
             <SkeletonCard key={`skeleton-${i}`} />
           ))}
 
-        {/* Pagination skeletons */}
+        {/* Load More Skeleton */}
         {!isInitialLoad && loading &&
           Array.from({ length: 6 }).map((_, i) => (
             <SkeletonCard key={`more-${i}`} />
           ))}
       </div>
 
+      {/* Infinite Scroll Trigger */}
       <div ref={observerRef} className="h-[50px]" />
     </div>
   );

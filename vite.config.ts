@@ -10,7 +10,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'CineSpark',
-        short_name: 'App',
+        short_name: 'CineSpark',
         description: 'Browse movies, TV shows and popular people powered by TMDB',
         theme_color: '#000000',
         background_color: '#000000',

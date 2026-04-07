@@ -4,7 +4,8 @@ import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
 import { getMovieDetail } from "../features/movieddetails/movieDetailSlice";
 import { IMG_BASE_URL } from "../api/tmdb";
 import type { Movie, Cast } from "../features/movieddetails/movieDetailSlice";
-
+import { X } from "lucide-react";
+import { Play } from "lucide-react";
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-800 rounded-lg ${className}`} />
 );
@@ -73,6 +74,8 @@ const MovieDetails = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  const [showPlayer, setShowPlayer] = useState(false);
+
   const { cache, loading } = useAppSelector((state) => state.movieDetail);
   const data = id ? cache[id] : null;
 
@@ -93,6 +96,7 @@ const MovieDetails = () => {
     el.scrollBy({ left: dir === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
   };
 
+  // ── SKELETON LOADING (from 1st file) ──
   if (loading || !data)
     return (
       <div className="bg-[#0a0a0a] min-h-screen">
@@ -136,6 +140,7 @@ const MovieDetails = () => {
   return (
     <div className="bg-[#0a0a0a] text-white min-h-screen">
 
+      {/* ── HERO SECTION (1st file UI) ── */}
       <div
         className="w-full min-h-[420px] sm:min-h-[500px] md:min-h-[65vh] lg:min-h-[75vh] bg-cover bg-center bg-no-repeat relative"
         style={{ backgroundImage: movie.backdrop_path ? `url(${IMG_BASE_URL}${movie.backdrop_path})` : "none" }}
@@ -173,7 +178,7 @@ const MovieDetails = () => {
                 {movie.runtime && (<><span className="text-gray-600">•</span><span className="text-gray-300">{movie.runtime} min</span></>)}
               </div>
               {movie.genres && (
-                <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-1">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-1 mb-5">
                   {movie.genres.map((g: { id: number; name: string }) => (
                     <span key={g.id} className="text-xs px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full hover:bg-white/20 transition-colors duration-200 cursor-default">
                       {g.name}
@@ -181,12 +186,43 @@ const MovieDetails = () => {
                   ))}
                 </div>
               )}
+
+            <button
+  onClick={() => setShowPlayer(true)}
+  className="mt-4 border-2 border-white  px-6 py-2 rounded-lg text-white font-semibold flex items-center gap-2"
+>
+  <Play size={20} />
+  Watch Now
+</button>
             </div>
+
           </div>
         </div>
       </div>
 
-      {/* ── CAST ── */}
+      {showPlayer && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+         <button
+  onClick={() => setShowPlayer(false)}
+  className="absolute top-5 right-5 text-white hover:scale-110 transition"
+>
+  <X size={32} />
+</button>
+          <div
+            className="w-[90%] max-w-5xl h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={`https://vidsrc.xyz/embed/movie/${id}`}
+              className="w-full h-full rounded-lg"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── CAST (1st file UI) ── */}
       {cast?.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Cast</h2>
@@ -197,12 +233,7 @@ const MovieDetails = () => {
                 castScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
             >‹</button>
-
-            <div
-              ref={castScrollRef}
-              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
-              style={{ scrollbarWidth: "none" }}
-            >
+            <div ref={castScrollRef} className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1" style={{ scrollbarWidth: "none" }}>
               {cast.map((actor: Cast) => (
                 <div key={actor.id} className="min-w-[90px] sm:min-w-[115px] md:min-w-[130px] flex-shrink-0 group">
                   <div className="overflow-hidden rounded-lg">
@@ -218,7 +249,6 @@ const MovieDetails = () => {
                 </div>
               ))}
             </div>
-
             <button
               onClick={() => scroll(castScrollRef, "right")}
               className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
@@ -229,7 +259,7 @@ const MovieDetails = () => {
         </div>
       )}
 
-      {/* ── SIMILAR MOVIES ── */}
+      {/* ── SIMILAR MOVIES (1st file UI) ── */}
       {similar?.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12 pb-12 sm:pb-16">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Similar Movies</h2>
@@ -240,12 +270,7 @@ const MovieDetails = () => {
                 similarScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
             >‹</button>
-
-            <div
-              ref={similarScrollRef}
-              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
-              style={{ scrollbarWidth: "none" }}
-            >
+            <div ref={similarScrollRef} className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1" style={{ scrollbarWidth: "none" }}>
               {similar.map((item: Movie) => (
                 <div key={item.id} onClick={() => navigate(`/movie/${item.id}`)} className="min-w-[100px] sm:min-w-[140px] md:min-w-[155px] flex-shrink-0 cursor-pointer group">
                   <div className="overflow-hidden rounded-lg">
@@ -260,7 +285,6 @@ const MovieDetails = () => {
                 </div>
               ))}
             </div>
-
             <button
               onClick={() => scroll(similarScrollRef, "right")}
               className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${

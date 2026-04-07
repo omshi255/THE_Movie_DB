@@ -41,22 +41,6 @@ const LazyImage = ({
   );
 };
 
-const ArrowButton = ({
-  direction, onClick, visible,
-}: {
-  direction: "left" | "right"; onClick: () => void; visible: boolean;
-}) => (
-  <button
-    onClick={onClick}
-    className={`absolute top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black text-white rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center shadow-lg transition-all duration-200 ${
-      visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-    }`}
-    style={{ [direction]: "6px" }}
-  >
-    {direction === "left" ? "‹" : "›"}
-  </button>
-);
-
 const useScrollState = (ref: React.RefObject<HTMLDivElement | null>) => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -166,7 +150,7 @@ const MovieDetails = () => {
               <div className="w-full aspect-[2/3] overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.8)] ring-2 ring-white/15">
                 <LazyImage
                   src={movie.poster_path ? `${IMG_BASE_URL}${movie.poster_path}` : "https://via.placeholder.com/300x450"}
-                  alt={movie.title}
+                  alt={movie.title ?? "Movie poster"}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -202,93 +186,90 @@ const MovieDetails = () => {
         </div>
       </div>
 
- {/* ── CAST ── */}
-{cast?.length > 0 && (
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12">
-    <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Cast</h2>
-    <div className="relative flex items-center gap-2">
-      {/* LEFT ARROW — outside scroll container */}
-      <button
-        onClick={() => scroll(castScrollRef, "left")}
-        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
-          castScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >‹</button>
+      {/* ── CAST ── */}
+      {cast?.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Cast</h2>
+          <div className="relative flex items-center gap-2">
+            <button
+              onClick={() => scroll(castScrollRef, "left")}
+              className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
+                castScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >‹</button>
 
-      {/* SCROLL CONTAINER */}
-      <div
-        ref={castScrollRef}
-        className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {cast.map((actor: Cast) => (
-          <div key={actor.id} className="min-w-[90px] sm:min-w-[115px] md:min-w-[130px] flex-shrink-0 group">
-            <div className="overflow-hidden rounded-lg">
-              <LazyImage
-                src={actor.profile_path ? `${IMG_BASE_URL}${actor.profile_path}` : "https://via.placeholder.com/120x160"}
-                alt={actor.name}
-                className="w-full h-[120px] sm:h-[155px] md:h-[175px] object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                skeletonClass="h-[120px] sm:h-[155px] md:h-[175px]"
-              />
+            <div
+              ref={castScrollRef}
+              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {cast.map((actor: Cast) => (
+                <div key={actor.id} className="min-w-[90px] sm:min-w-[115px] md:min-w-[130px] flex-shrink-0 group">
+                  <div className="overflow-hidden rounded-lg">
+                    <LazyImage
+                      src={actor.profile_path ? `${IMG_BASE_URL}${actor.profile_path}` : "https://via.placeholder.com/120x160"}
+                      alt={actor.name ?? "Cast member"}
+                      className="w-full h-[120px] sm:h-[155px] md:h-[175px] object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                      skeletonClass="h-[120px] sm:h-[155px] md:h-[175px]"
+                    />
+                  </div>
+                  <p className="text-xs sm:text-sm mt-1.5 font-semibold leading-snug">{actor.name}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 leading-snug mt-0.5">{actor.character}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-xs sm:text-sm mt-1.5 font-semibold leading-snug">{actor.name}</p>
-            <p className="text-[10px] sm:text-xs text-gray-400 leading-snug mt-0.5">{actor.character}</p>
+
+            <button
+              onClick={() => scroll(castScrollRef, "right")}
+              className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
+                castScroll.canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >›</button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* RIGHT ARROW — outside scroll container */}
-      <button
-        onClick={() => scroll(castScrollRef, "right")}
-        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
-          castScroll.canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >›</button>
-    </div>
-  </div>
-)}
+      {/* ── SIMILAR MOVIES ── */}
+      {similar?.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12 pb-12 sm:pb-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Similar Movies</h2>
+          <div className="relative flex items-center gap-2">
+            <button
+              onClick={() => scroll(similarScrollRef, "left")}
+              className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
+                similarScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >‹</button>
 
-{/* ── SIMILAR MOVIES ── */}
-{similar?.length > 0 && (
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 sm:mt-12 pb-12 sm:pb-16">
-    <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 tracking-wide">Similar Movies</h2>
-    <div className="relative flex items-center gap-2">
-      <button
-        onClick={() => scroll(similarScrollRef, "left")}
-        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
-          similarScroll.canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >‹</button>
-
-      <div
-        ref={similarScrollRef}
-        className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {similar.map((item: Movie) => (
-          <div key={item.id} onClick={() => navigate(`/movie/${item.id}`)} className="min-w-[100px] sm:min-w-[140px] md:min-w-[155px] flex-shrink-0 cursor-pointer group">
-            <div className="overflow-hidden rounded-lg">
-              <LazyImage
-                src={item.poster_path ? `${IMG_BASE_URL}${item.poster_path}` : "https://via.placeholder.com/150x220"}
-                alt={item.title}
-                className="w-full h-[145px] sm:h-[205px] md:h-[225px] object-cover group-hover:scale-105 transition-transform duration-300"
-                skeletonClass="h-[145px] sm:h-[205px] md:h-[225px]"
-              />
+            <div
+              ref={similarScrollRef}
+              className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 flex-1"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {similar.map((item: Movie) => (
+                <div key={item.id} onClick={() => navigate(`/movie/${item.id}`)} className="min-w-[100px] sm:min-w-[140px] md:min-w-[155px] flex-shrink-0 cursor-pointer group">
+                  <div className="overflow-hidden rounded-lg">
+                    <LazyImage
+                      src={item.poster_path ? `${IMG_BASE_URL}${item.poster_path}` : "https://via.placeholder.com/150x220"}
+                      alt={item.title ?? "Similar movie"}
+                      className="w-full h-[145px] sm:h-[205px] md:h-[225px] object-cover group-hover:scale-105 transition-transform duration-300"
+                      skeletonClass="h-[145px] sm:h-[205px] md:h-[225px]"
+                    />
+                  </div>
+                  <p className="text-xs sm:text-sm mt-1.5 font-medium leading-snug">{item.title}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-xs sm:text-sm mt-1.5 font-medium leading-snug">{item.title}</p>
-          </div>
-        ))}
-      </div>
 
-      <button
-        onClick={() => scroll(similarScrollRef, "right")}
-        className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
-          similarScroll.canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >›</button>
-    </div>
-  </div>
-)}
+            <button
+              onClick={() => scroll(similarScrollRef, "right")}
+              className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 hover:bg-gray-500 border border-gray-500 text-white text-xl font-bold flex items-center justify-center shadow-lg transition-all duration-200 ${
+                similarScroll.canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >›</button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

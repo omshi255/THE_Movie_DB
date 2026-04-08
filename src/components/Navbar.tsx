@@ -41,7 +41,7 @@ const NavItem = ({
       <span
         onClick={() => {
           onClick?.();
-          closeMenu?.(); // ✅ close mobile menu
+          closeMenu?.();
         }}
         className="cursor-pointer hover:text-gray-300 text-sm font-medium block py-2"
       >
@@ -73,7 +73,7 @@ const NavItem = ({
               onClick={() => {
                 navigate(item.path);
                 setOpen(false);
-                closeMenu?.(); // ✅ close mobile menu
+                closeMenu?.(); 
               }}
               className="px-4 py-2 text-sm hover:bg-[#032541] cursor-pointer border-b border-gray-700 last:border-none"
             >
@@ -91,7 +91,6 @@ const Navbar = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // ✅ auto close menu on route change
   useEffect(() => {
     setMenuOpen(false);
   }, [location]);
@@ -100,15 +99,22 @@ const Navbar = () => {
     <nav className="bg-[#032541] text-white px-4 md:px-10 py-4">
       <div className="flex items-center justify-between">
 
-        {/* Logo */}
-        <h1
-          onClick={() => navigate("/")}
-          className="text-xl md:text-2xl font-bold text-green-400 cursor-pointer"
-        >
-          TMDB
-        </h1>
+        
+       <div
+  onClick={() => navigate("/")}
+  className="flex items-center gap-2 cursor-pointer"
+>
+  <img
+    src="/favicon.ico"
+    alt="logo"
+    className="w-8 h-8 md:w-9 md:h-9 rounded-md"
+  />
 
-        {/* Desktop Menu */}
+  <h1 className="text-xl md:text-2xl font-bold text-green-400">
+    CineSpark
+  </h1>
+</div>
+
         <div className="hidden md:flex gap-6 items-center">
           <NavItem
             label="Movies"

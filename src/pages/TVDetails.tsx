@@ -24,14 +24,9 @@ const ArrowButton = ({
 
 const SOURCES = [
   {
-    label: "VidSrc.xyz",
+    label: "Vidking",
     url: (id: number, s: number, e: number) =>
-      `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    label: "2Embed",
-    url: (id: number, s: number, e: number) =>
-      `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
+      `https://www.vidking.net/embed/tv/${id}/${s}/${e}`,
   },
 ];
 
@@ -54,7 +49,7 @@ const PlayerModal = ({
 
   const switchSource = (index: number) => {
     setSourceIndex(index);
-    setIframeKey((k) => k + 1); // force iframe reload
+    setIframeKey((k) => k + 1); 
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -100,7 +95,6 @@ const PlayerModal = ({
           />
         </div>
 
-        {/* Source Switcher */}
         <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
           <span className="text-white/40 text-xs mr-1">Source:</span>
           {SOURCES.map((src, i) => (
@@ -199,7 +193,6 @@ const TVDetails = () => {
     if (!tvId) return;
     dispatch(clearMovieDetailCache());
     dispatch(getTvDetail(tvId));
-    // Reset player state when TV show changes
     setShowPlayer(false);
     setSelectedSeason(1);
     setSelectedEpisode(1);
@@ -235,7 +228,6 @@ const TVDetails = () => {
   const similar: TvDetail[] = tv.similar?.results ?? [];
 
   const totalSeasons = tv.number_of_seasons ?? 1;
-  // Try to use episodes from selected season info, fallback to total episodes or 20
   const totalEpisodes = tv.number_of_episodes
     ? Math.min(tv.number_of_episodes, 30)
     : 20;
@@ -243,7 +235,6 @@ const TVDetails = () => {
   return (
     <div className="bg-[#0a0a0a] text-white min-h-screen">
 
-      {/* ── PLAYER MODAL ── */}
       {showPlayer && (
         <PlayerModal
           tvId={tvId}
@@ -253,7 +244,6 @@ const TVDetails = () => {
         />
       )}
 
-      {/* ── HERO BACKDROP ── */}
       <div
         className="w-full min-h-[420px] sm:min-h-[500px] md:min-h-[65vh] lg:min-h-[75vh] bg-cover bg-center bg-no-repeat relative"
         style={{
@@ -262,7 +252,6 @@ const TVDetails = () => {
             : "none",
         }}
       >
-        {/* Single combined overlay */}
         <div
           className="absolute inset-0"
           style={{
@@ -278,7 +267,6 @@ const TVDetails = () => {
         >
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:gap-8 md:gap-12">
 
-            {/* POSTER */}
             <div className="flex-shrink-0 w-32 sm:w-44 md:w-56 lg:w-64">
               <img
                 loading="lazy"
@@ -292,10 +280,8 @@ const TVDetails = () => {
               />
             </div>
 
-            {/* INFO */}
             <div className="text-center sm:text-left flex-1 min-w-0 pb-1">
 
-              {/* Title */}
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 sm:mb-2 leading-tight tracking-tight">
                 {tv.name}
               </h1>

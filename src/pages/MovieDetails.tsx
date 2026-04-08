@@ -14,8 +14,7 @@ const Skeleton = ({ className }: { className?: string }) => (
 const LazyImage = ({
   src, alt, className, skeletonClass,
 }: {
-  src: string; alt: string; className?: string; skeletonClass?: string;f
-}) => {
+src: string; alt: string; className?: string; skeletonClass?: string;}) => {
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
